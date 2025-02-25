@@ -47,10 +47,11 @@
                     <th>Jumlah</th>
                     <th>SA</th>
                     <th>SD</th>
-                    <th>SA_End</th>
-                    <th>SD_End</th>
+                    <th>SA End</th>
+                    <th>SD End</th>
                     <th>Jenis Back Mesh</th>
                     <th>Jumlah Back Mesh</th>
+                    <th>BM End</th> <!-- Tambahan BM End -->
                     <th>Bracket</th>
                     <th>Jenis Tiang</th>
                     <th>Jumlah Tiang</th>
@@ -84,14 +85,13 @@
             const jumlahRak = parseInt(document.getElementById('jumlahRak').value) || 0;
             let ukuran = document.getElementById('ukuran').value;
 
-            let sa_end = 0, sd_end = 0, sa = 0, sd = 0, tipeBM, jumlahBM, bracket, tipeTiang, jumlahTiang;
+            let sa_end = 0, sd_end = 0, sa = 0, sd = 0, tipeBM, jumlahBM, bracket, tipeTiang, jumlahTiang, bm_end = 0;
 
             if (tipeRak === "end") {
                 ukuran = "150";
                 sa_end = jumlahRak * 3;
                 sd_end = jumlahRak * 1;
-                tipeBM = "BM 150";
-                jumlahBM = jumlahRak;
+                bm_end = jumlahRak; // BM End dihitung terpisah
                 bracket = sa_end * 2;
                 tipeTiang = "Tiang Single 150";
                 jumlahTiang = jumlahRak * 2;
@@ -106,7 +106,7 @@
                 jumlahTiang = tipeRak === "utama" ? jumlahRak * 2 : jumlahRak;
             }
 
-            return { tipeRak, ukuran, jumlahRak, sa_end, sd_end, sa, sd, tipeBM, jumlahBM, bracket, tipeTiang, jumlahTiang };
+            return { tipeRak, ukuran, jumlahRak, sa_end, sd_end, sa, sd, tipeBM, jumlahBM, bm_end, bracket, tipeTiang, jumlahTiang };
         }
 
         function tambahData() {
@@ -143,14 +143,15 @@
             tbody.innerHTML = dataRak.map((data, index) => `
         <tr>
             <td>${data.tipeRak}</td>
-            <td>${data.ukuran}</td>
+            <td>${data.ukuran || '-'}</td>
             <td>${data.jumlahRak}</td>
             <td>${data.sa}</td>
             <td>${data.sd}</td>
             <td>${data.sa_end}</td>
             <td>${data.sd_end}</td>
-            <td>${data.tipeBM}</td>
-            <td>${data.jumlahBM}</td>
+            <td>${data.tipeBM || '-'}</td>
+            <td>${data.jumlahBM || '-'}</td>
+            <td>${data.bm_end}</td> <!-- BM End -->
             <td>${data.bracket}</td>
             <td>${data.tipeTiang}</td>
             <td>${data.jumlahTiang}</td>
@@ -160,14 +161,15 @@
         }
 
         function hitungTotalKeseluruhan() {
-            let totalKomponen = { SA: 0, SD: 0, SA_End: 0, SD_End: 0, "BM 150": 0, "BM 180": 0, Bracket: 0, "Tiang Single 150": 0, "Tiang Double 150": 0, "Tiang Single 180": 0, "Tiang Double 180": 0 };
+            let totalKomponen = { SA: 0, SD: 0, SA_End: 0, SD_End: 0, "BM 150": 0, "BM 180": 0, "BM End": 0, Bracket: 0, "Tiang Single 150": 0, "Tiang Double 150": 0, "Tiang Single 180": 0, "Tiang Double 180": 0 };
 
             dataRak.forEach(data => {
                 totalKomponen.SA += data.sa;
                 totalKomponen.SD += data.sd;
                 totalKomponen.SA_End += data.sa_end;
                 totalKomponen.SD_End += data.sd_end;
-                totalKomponen[data.tipeBM] += data.jumlahBM;
+                totalKomponen["BM End"] += data.bm_end;
+                if (data.tipeBM) totalKomponen[data.tipeBM] += data.jumlahBM;
                 totalKomponen.Bracket += data.bracket;
                 totalKomponen[data.tipeTiang] += data.jumlahTiang;
             });
@@ -181,7 +183,6 @@
 
             document.getElementById('totalOutput').innerHTML = output;
         }
-
 
     </script>
 </body>
