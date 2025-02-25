@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Rak Supermarket</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Kalkulator Rak Supermarket</h1>
+        <form id="rakForm">
+            <div class="form-group">
+                <label for="tipeRak">Pilih Tipe Rak</label>
+                <select id="tipeRak" required onchange="toggleInput()">
+                    <option value="" selected disabled>Pilih Tipe Rak</option>
+                    <option value="end">Rak End</option>
+                    <option value="utama">Rak Utama</option>
+                    <option value="sambung">Rak Sambung</option>
+                </select>
+            </div>
+            <div class="form-group" id="jumlahRakGroup">
+                <label for="jumlahRak">Jumlah Rak</label>
+                <input type="number" id="jumlahRak" required>
+            </div>
+            <div class="form-group" id="ukuranGroup">
+                <label for="ukuran">Pilih Ukuran Rak</label>
+                <select id="ukuran" required>
+                    <option value="" selected disabled>Pilih Ukuran</option>
+                    <option value="150_single">150 Single</option>
+                    <option value="150_double">150 Double</option>
+                    <option value="180_single">180 Single</option>
+                    <option value="180_double">180 Double</option>
+                </select>
+            </div>
+            <button type="button" onclick="tambahData()">Tambah</button>
+            <button type="button" onclick="resetData()">Reset</button>
+        </form>
+
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Tipe Rak</th>
+                    <th>Ukuran</th>
+                    <th>Jumlah</th>
+                    <th>SA</th>
+                    <th>SD</th>
+                    <th>SA_End</th>
+                    <th>SD_End</th>
+                    <th>Jenis Back Mesh</th>
+                    <th>Jumlah Back Mesh</th>
+                    <th>Bracket</th>
+                    <th>Jenis Tiang</th>
+                    <th>Jumlah Tiang</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="total" id="total">
+            <h3>Total Keseluruhan:</h3>
+            <div id="totalOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        let dataRak = [];
+
+        function toggleInput() {
+            const tipeRak = document.getElementById('tipeRak').value;
+            const ukuranGroup = document.getElementById('ukuranGroup');
+            if (tipeRak === 'end') {
+                ukuranGroup.style.display = 'none';
+            } else {
+                ukuranGroup.style.display = 'block';
+            }
+        }
+
+        function hitungKomponen() {
+            const tipeRak = document.getElementById('tipeRak').value;
+            const jumlahRak = parseInt(document.getElementById('jumlahRak').value) || 0;
+            let ukuran = document.getElementById('ukuran').value;
+
+            let sa_end = 0, sd_end = 0, sa = 0, sd = 0, tipeBM, jumlahBM, bracket, tipeTiang, jumlahTiang;
+
+            if (tipeRak === "end") {
+                ukuran = "150";
+                sa_end = jumlahRak * 3;
+                sd_end = jumlahRak * 1;
+                tipeBM = "BM 150";
+                jumlahBM = jumlahRak;
+                bracket = sa_end * 2;
+                tipeTiang = "Tiang Single 150";
+                jumlahTiang = jumlahRak * 2;
+            } else {
+                sa = ukuran.includes("150") ? jumlahRak * 3 : jumlahRak * 4;
+                if (ukuran.includes("double")) sa *= 2;
+                sd = ukuran.includes("single") ? jumlahRak : jumlahRak * 2;
+                tipeBM = ukuran.includes("150") ? "BM 150" : "BM 180";
+                jumlahBM = jumlahRak;
+                bracket = sa * 2;
+                tipeTiang = ukuran.includes("150") ? (ukuran.includes("single") ? "Tiang Single 150" : "Tiang Double 150") : (ukuran.includes("single") ? "Tiang Single 180" : "Tiang Double 180");
+                jumlahTiang = tipeRak === "utama" ? jumlahRak * 2 : jumlahRak;
+            }
+
+            return { tipeRak, ukuran, jumlahRak, sa_end, sd_end, sa, sd, tipeBM, jumlahBM, bracket, tipeTiang, jumlahTiang };
+        }
+
+        function tambahData() {
+            const tipeRak = document.getElementById('tipeRak').value;
+            const jumlahRak = document.getElementById('jumlahRak').value;
+            const ukuran = document.getElementById('ukuran').value;
+
+            // **VALIDASI INPUT**
+            if (!tipeRak || !jumlahRak || (tipeRak !== 'end' && !ukuran)) {
+                alert("Silahkan Masukkan Data");
+                return;
+            }
+
+            dataRak.push(hitungKomponen());
+            renderTable();
+            hitungTotalKeseluruhan();
+        }
+
+        function resetData() {
+            dataRak = [];
+            renderTable();
+            document.getElementById('rakForm').reset();
+            hitungTotalKeseluruhan();
+        }
+
+        function hapusData(index) {
+            dataRak.splice(index, 1);
+            renderTable();
+            hitungTotalKeseluruhan();
+        }
+
+        function renderTable() {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = dataRak.map((data, index) => `
+        <tr>
+            <td>${data.tipeRak}</td>
+            <td>${data.ukuran}</td>
+            <td>${data.jumlahRak}</td>
+            <td>${data.sa}</td>
+            <td>${data.sd}</td>
+            <td>${data.sa_end}</td>
+            <td>${data.sd_end}</td>
+            <td>${data.tipeBM}</td>
+            <td>${data.jumlahBM}</td>
+            <td>${data.bracket}</td>
+            <td>${data.tipeTiang}</td>
+            <td>${data.jumlahTiang}</td>
+            <td><button onclick="hapusData(${index})">Hapus</button></td>
+        </tr>
+    `).join('');
+        }
+
+        function hitungTotalKeseluruhan() {
+            let totalKomponen = { SA: 0, SD: 0, SA_End: 0, SD_End: 0, "BM 150": 0, "BM 180": 0, Bracket: 0, "Tiang Single 150": 0, "Tiang Double 150": 0, "Tiang Single 180": 0, "Tiang Double 180": 0 };
+
+            dataRak.forEach(data => {
+                totalKomponen.SA += data.sa;
+                totalKomponen.SD += data.sd;
+                totalKomponen.SA_End += data.sa_end;
+                totalKomponen.SD_End += data.sd_end;
+                totalKomponen[data.tipeBM] += data.jumlahBM;
+                totalKomponen.Bracket += data.bracket;
+                totalKomponen[data.tipeTiang] += data.jumlahTiang;
+            });
+
+            let output = "";
+            for (let key in totalKomponen) {
+                if (totalKomponen[key] > 0) {
+                    output += `<p>${key}: ${totalKomponen[key]}</p>`;
+                }
+            }
+
+            document.getElementById('totalOutput').innerHTML = output;
+        }
+
+
+    </script>
+</body>
+
+</html>
