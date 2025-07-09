@@ -32,3 +32,10 @@
   - Validasi input agar tidak kosong
   - Tombol Reset untuk menghapus data sekaligus
 
+___
+
+## 📸 Tampilan Antarmuka
+
+![Tampilan Aplikasi](screenshot.png)
+
+
